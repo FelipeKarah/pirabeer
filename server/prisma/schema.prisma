@@ -1,0 +1,147 @@
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Product {
+  id          String @id @default(uuid())
+  title       String
+  bannerUrl   String
+  value       String
+  brand       String
+  categoryId  String
+  kit         Boolean @default(false)
+  sale        Boolean @default(false)
+  dtSale      DateTime
+  vlSale      String
+  amount      Int
+  status      String @default("Ativo")
+  
+  category Category @relation(fields: [categoryId], references: [id])
+  
+  productsRequest   ProductsRequest[]
+  carts      Cart[]
+
+  @@map("products")
+}
+
+model Category {
+  id          String @id @default(uuid())
+  title       String
+  bannerUrl   String
+  status      String @default("Ativo")
+
+  products    Product[]
+
+  @@map("categories")
+}
+
+model User {
+  id          String @id @default(uuid())
+  firstName   String
+  lastName    String
+  cpf         String
+  email       String @unique
+  password    String
+  status      String @default("Ativo")
+  telephone   String
+  cell        String
+
+  address    Address[]
+  carts      Cart[]
+  requests   Request[]
+
+  @@map("users")
+}
+
+model Address {
+  id          String @id @default(uuid())
+  userId      String
+  cep         String
+  road        String
+  place       String
+  number      String
+  district    String
+  city        String
+  state       String
+  country     String
+  latitude    String
+  longitude   String
+  status      String @default("Ativo")
+  inDelivery  Boolean
+
+  requests    Request[]
+
+  @@map("address")
+
+  users User @relation(fields: [userId], references: [id])
+
+}
+
+
+model Cart {
+  id          String @id @default(uuid())
+  userId      String
+  productId   String
+  amount      Int
+  status      String @default("Ativo")
+
+  users User @relation(fields: [userId], references: [id])
+  products Product @relation(fields: [productId], references: [id])
+
+  @@map("carts")
+}
+
+model Request {
+  id                String @unique @default(uuid())
+  cod               Int    @id @default(autoincrement())
+  userId            String 
+  status            String @default("Ativo")
+  freightage        String
+  temperature       String @default("Natural")
+  addressDeliveryId String
+  note              String?
+  value             String
+  valueFrete        String?
+  dateDelivery      DateTime?
+  expectedDelivery  DateTime? 
+  createdAt         DateTime @default(now())
+  cupomId           String?
+
+  productsRequest   ProductsRequest[]
+
+  users User @relation(fields: [userId], references: [id])
+  address Address @relation(fields: [addressDeliveryId], references: [id])
+
+  @@map("requests")
+}
+
+model ProductsRequest {
+  id                String @id @default(uuid())
+  requestId         String 
+  productId         String
+  amount            Int 
+  value             String
+
+  requests Request @relation(fields: [requestId], references: [id])
+  produtos Product @relation(fields: [productId], references: [id])
+
+  @@map("productsRequest")
+}
+
+model Frete {
+  id                String @id @default(uuid())
+  valueKm           String
+  valueMax          String
+  valueMin          String
+  city              String
+
+  @@map("frete")
+}
+
+
